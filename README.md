@@ -1,2 +1,2 @@
 # Wappinger
-Easy teleport system.
+Easy teleportation system.

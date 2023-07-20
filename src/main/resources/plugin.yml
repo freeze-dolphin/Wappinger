@@ -1,0 +1,16 @@
+name: Wappinger
+version: ${version}
+author: Sapphira Tempest
+description: Makes warp easy in a click.
+
+main: io.sn.wappinger.WapCore
+depend:
+  - Slimefun
+  - NBTAPI
+  - CommandAPI
+  - ItemsAdder
+
+api-version: 1.20
+
+libraries:
+  - org.jetbrains.kotlin:kotlin-stdlib:1.8.20
