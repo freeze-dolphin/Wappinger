@@ -23,7 +23,7 @@ dependencies {
     compileOnly("dev.jorel:commandapi-bukkit-core:9.0.3")
     compileOnly("com.github.HAPPYLAND-Dev:Slimefun4:00f2f4bf63")
     compileOnly("com.github.Jannyboy11.GuiLib:GuiLib-Plugin:v1.12.3")
-    compileOnly("de.tr7zw:item-nbt-api-plugin:2.11.3")
+    // compileOnly("de.tr7zw:item-nbt-api-plugin:2.11.3")
     compileOnly("net.kyori:adventure-text-minimessage:4.14.0")
 }
 

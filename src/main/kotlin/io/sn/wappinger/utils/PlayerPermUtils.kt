@@ -8,7 +8,7 @@ object PlayerPermUtils {
         return plr.effectivePermissions.filter {
             it.permission.startsWith("wappinger.delay.")
         }.maxOfOrNull {
-            it.permission.toInt()
+            it.permission.split(".")[2].toInt()
         } ?: default
     }
 

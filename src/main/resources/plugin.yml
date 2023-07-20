@@ -5,10 +5,8 @@ description: Makes warp easy in a click.
 
 main: io.sn.wappinger.WapCore
 depend:
-  - Slimefun
-  - NBTAPI
+  - GuiLib
   - CommandAPI
-  - ItemsAdder
 
 api-version: 1.20
 

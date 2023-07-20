@@ -1,6 +1,7 @@
 package io.sn.wappinger.setup
 
 import dev.jorel.commandapi.CommandAPICommand
+import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.BooleanArgument
 import dev.jorel.commandapi.arguments.StringArgument
@@ -16,13 +17,13 @@ class CommandBus(private val plug: WapCore) {
     @Suppress("SENSELESS_COMPARISON")
     fun init() {
         CommandAPICommand("wappinger")
-            .withAliases("warp")
-            .withAliases("wap")
+            .withAliases("warp", "wap")
             .withSubcommands(
                 CommandAPICommand("create")
                     .withArguments(StringArgument("id"))
                     .withArguments(BooleanArgument("follow"))
                     .withArguments(BooleanArgument("hidden"))
+                    .withPermission(CommandPermission.OP)
                     .executesPlayer(PlayerCommandExecutor { sender, args ->
                         val id = args[0] as String
                         val follow = args[1] as Boolean
@@ -36,6 +37,7 @@ class CommandBus(private val plug: WapCore) {
                         }
 
                         WarpUtils.save(plug, hand, sender.location, id, follow, hidden)
+                        plug.sendmsg(sender, "<green>新增地标: <white>$id")
                     }),
                 CommandAPICommand("to")
                     .withArguments(StringArgument("id").replaceSuggestions(ArgumentSuggestions.stringsAsync { _ ->
@@ -43,7 +45,9 @@ class CommandBus(private val plug: WapCore) {
                             val storage = File(plug.dataFolder.path + File.separator + "storage")
                             storage.list { _, name ->
                                 name.endsWith(".yml")
-                            }
+                            }?.map {
+                                it.split(".yml")[0]
+                            }?.toTypedArray() ?: emptyArray()
                         }
                     }))
                     .executesPlayer(PlayerCommandExecutor { sender, args ->
