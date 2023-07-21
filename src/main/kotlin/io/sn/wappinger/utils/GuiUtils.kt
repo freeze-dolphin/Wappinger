@@ -29,7 +29,9 @@ object GuiUtils {
         }?.sortedBy {
             it.getString("id")
         }?.filter {
-            plr.hasPermission("wappinger.view.${it.getString("id")}")
+            if (it.getBoolean("hiddenp")) {
+                plr.hasPermission("wappinger.view.${it.getString("id")}")
+            } else true
         }
     }
 
@@ -72,11 +74,15 @@ object GuiUtils {
         ymls.forEachIndexed { index, yml ->
             inv.addItem(index, yml.getItemStack("icon")) { p, _, _, _ ->
                 try {
-                    WarpUtils.teleport(plug, plr, yml.getString("id")!!)
+                    WarpUtils.teleport(plug, plr, yml)
                 } catch (ex: Exception) {
                     plug.sendmsg(p, "<red>${ex.message}")
                 }
                 p.closeInventory()
+                Bukkit.getScheduler().runTaskLater(plug, Runnable {
+                    @Suppress("UnstableApiUsage")
+                    p.updateInventory()
+                }, 10L)
                 return@addItem false
             }
         }

@@ -42,35 +42,23 @@ object WarpUtils {
         }
     }
 
-    private fun getDestination(plug: WapCore, id: String, plr: Player): Location {
-        with(File(plug.dataFolder.path + File.separator + "storage" + File.separator + id + ".yml")) {
-            if (!exists()) {
-                throw IOException("找不到地标 $id")
-            }
+    private fun getDestination(yml: YamlConfiguration, plr: Player): Location {
+        val dest = yml.getLocation("destination") ?: return plr.location
+        val follow = yml.getBoolean("followp")
 
-            val yml = YamlConfiguration.loadConfiguration(this)
-            val dest = yml.getLocation("destination") ?: return plr.location
-            val follow = yml.getBoolean("followp")
-
-            if (follow) {
-                dest.yaw = plr.location.yaw
-                dest.pitch = plr.location.pitch
-            }
-            return dest
+        if (follow) {
+            dest.yaw = plr.location.yaw
+            dest.pitch = plr.location.pitch
         }
+        return dest
     }
 
-    fun teleport(plug: WapCore, plr: Player, id: String) {
-        with(File(plug.dataFolder.path + File.separator + "storage" + File.separator + id + ".yml")) {
-            if (!exists()) {
-                throw IOException("找不到地标 $id")
-            }
-        }
-
-        val dest = getDestination(plug, id, plr)
+    fun teleport(plug: WapCore, plr: Player, yml: YamlConfiguration) {
+        val dest = getDestination(yml, plr)
         val delay = PlayerPermUtils.getWarpDelay(plr, plug.config.getInt("default-delay"))
 
         if (delay == 0) {
+            plr.fallDistance = 0F
             plr.teleport(dest)
             plug.sendtitle(
                 plr,
@@ -84,6 +72,7 @@ object WarpUtils {
         val timer = CountdownTimer(plug, delay,
             { // before
             }, { // end
+                plr.fallDistance = 0F
                 plr.teleport(dest)
                 plug.sendtitle(
                     plr,
@@ -110,6 +99,16 @@ object WarpUtils {
         }
         moveDetectMap[plr.uniqueId] = timer
         moveDetectMap[plr.uniqueId]?.scheduleTimer()
+    }
+
+    fun teleport(plug: WapCore, plr: Player, id: String) {
+        with(File(plug.dataFolder.path + File.separator + "storage" + File.separator + id + ".yml")) {
+            if (!exists()) {
+                throw IOException("找不到地标 $id")
+            }
+
+            teleport(plug, plr, YamlConfiguration.loadConfiguration(this))
+        }
     }
 
 }
