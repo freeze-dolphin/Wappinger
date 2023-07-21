@@ -4,11 +4,14 @@ import dev.jorel.commandapi.CommandAPICommand
 import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.BooleanArgument
+import dev.jorel.commandapi.arguments.IntegerArgument
 import dev.jorel.commandapi.arguments.StringArgument
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import io.sn.wappinger.WapCore
+import io.sn.wappinger.utils.GuiUtils
 import io.sn.wappinger.utils.WarpUtils
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import java.io.File
 import java.util.concurrent.CompletableFuture
 
@@ -16,51 +19,66 @@ class CommandBus(private val plug: WapCore) {
 
     @Suppress("SENSELESS_COMPARISON")
     fun init() {
-        CommandAPICommand("wappinger")
-            .withAliases("warp", "wap")
-            .withSubcommands(
-                CommandAPICommand("create")
-                    .withArguments(StringArgument("id"))
-                    .withArguments(BooleanArgument("follow"))
-                    .withArguments(BooleanArgument("hidden"))
-                    .withPermission(CommandPermission.OP)
-                    .executesPlayer(PlayerCommandExecutor { sender, args ->
-                        val id = args[0] as String
-                        val follow = args[1] as Boolean
-                        val hidden = args[2] as Boolean
+        CommandAPICommand("wappinger").withAliases("warp", "wap").withSubcommands(
+            CommandAPICommand("create").withArguments(StringArgument("id")).withArguments(BooleanArgument("follow"))
+                .withArguments(BooleanArgument("hidden")).withPermission(CommandPermission.OP)
+                .executesPlayer(PlayerCommandExecutor { sender, args ->
+                    val id = args[0] as String
+                    val follow = args[1] as Boolean
+                    val hidden = args[2] as Boolean
 
-                        val hand = sender.inventory.itemInMainHand
+                    val hand = sender.inventory.itemInMainHand
 
-                        if (hand == null || hand.type == Material.AIR) {
-                            plug.sendmsg(sender, "<red>你需要拿着一个当作图标的物品才能创建地标")
-                            return@PlayerCommandExecutor
-                        }
+                    if (hand == null || hand.type == Material.AIR) {
+                        plug.sendmsg(sender, "<red>你需要拿着一个当作图标的物品才能创建地标")
+                        return@PlayerCommandExecutor
+                    }
 
-                        WarpUtils.save(plug, hand, sender.location, id, follow, hidden)
-                        plug.sendmsg(sender, "<green>新增地标: <white>$id")
-                    }),
-                CommandAPICommand("to")
-                    .withArguments(StringArgument("id").replaceSuggestions(ArgumentSuggestions.stringsAsync { _ ->
-                        CompletableFuture.supplyAsync {
-                            val storage = File(plug.dataFolder.path + File.separator + "storage")
-                            storage.list { _, name ->
-                                name.endsWith(".yml")
-                            }?.map {
-                                it.split(".yml")[0]
-                            }?.toTypedArray() ?: emptyArray()
-                        }
-                    }))
-                    .executesPlayer(PlayerCommandExecutor { sender, args ->
-                        val id = args[0] as String
+                    WarpUtils.save(plug, hand, sender.location, id, follow, hidden)
+                    plug.sendmsg(sender, "<green>新增地标: <white>$id")
+                }),
+            CommandAPICommand("to").withArguments(StringArgument("id").replaceSuggestions(ArgumentSuggestions.stringsAsync { _ ->
+                CompletableFuture.supplyAsync {
+                    val storage = File(plug.dataFolder.path + File.separator + "storage")
+                    storage.list { _, name ->
+                        name.endsWith(".yml")
+                    }?.map {
+                        it.split(".yml")[0]
+                    }?.toTypedArray() ?: emptyArray()
+                }
+            })).executesPlayer(PlayerCommandExecutor { sender, args ->
+                val id = args[0] as String
 
-                        try {
-                            WarpUtils.teleport(plug, sender, id)
-                        } catch (ex: Exception) {
-                            plug.sendmsg(sender, "<red>" + ex.message)
-                        }
-                    })
-            )
-            .register()
+                try {
+                    WarpUtils.teleport(plug, sender, id)
+                } catch (ex: Exception) {
+                    plug.sendmsg(sender, "<red>" + ex.message)
+                }
+            }),
+            CommandAPICommand("gui").withArguments(IntegerArgument("page").replaceSuggestions(ArgumentSuggestions.stringsAsync { sender ->
+                CompletableFuture.supplyAsync {
+                    if (sender.sender is Player) {
+                        val waps = GuiUtils.fetch(sender.sender as Player) ?: throw Exception("目前还没有可用的地标")
+                        val totalPage = if (waps.size % 45 == 0) waps.size / 45 else waps.size / 45 + 1
+                        (0 until totalPage).toList().map {
+                            it.toString()
+                        }.toTypedArray()
+                    } else {
+                        emptyArray()
+                    }
+                }
+            })).executesPlayer(PlayerCommandExecutor { sender, args ->
+                val page = args[0] as Int
+
+                try {
+                    GuiUtils.openGuiFor(plug, sender, page)
+                } catch (ob: IndexOutOfBoundsException) {
+                    plug.sendmsg(sender, "<red>不存在这一页")
+                } catch (ex: Exception) {
+                    plug.sendmsg(sender, "<red>" + ex.message)
+                }
+            })
+        ).register()
     }
 
 }

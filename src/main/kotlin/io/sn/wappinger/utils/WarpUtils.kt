@@ -28,7 +28,7 @@ object WarpUtils {
             val ficon = ItemStack(icon)
             if (!ficon.itemMeta.hasDisplayName()) {
                 ficon.editMeta {
-                    it.displayName(WapCore.minimsg.deserialize("<white>$id"))
+                    it.displayName(WapCore.mini("<!italic><white>$id"))
                 }
             }
 
@@ -45,7 +45,7 @@ object WarpUtils {
     private fun getDestination(plug: WapCore, id: String, plr: Player): Location {
         with(File(plug.dataFolder.path + File.separator + "storage" + File.separator + id + ".yml")) {
             if (!exists()) {
-                throw IOException("找不到这个地标")
+                throw IOException("找不到地标 $id")
             }
 
             val yml = YamlConfiguration.loadConfiguration(this)
@@ -63,7 +63,7 @@ object WarpUtils {
     fun teleport(plug: WapCore, plr: Player, id: String) {
         with(File(plug.dataFolder.path + File.separator + "storage" + File.separator + id + ".yml")) {
             if (!exists()) {
-                throw IOException("找不到这个地标")
+                throw IOException("找不到地标 $id")
             }
         }
 

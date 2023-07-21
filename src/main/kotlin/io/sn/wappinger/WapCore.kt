@@ -3,29 +3,30 @@ package io.sn.wappinger
 import io.sn.wappinger.setup.CommandBus
 import io.sn.wappinger.setup.ListenerBus
 import net.kyori.adventure.audience.Audience
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.title.Title
 import org.bukkit.plugin.java.JavaPlugin
-import xyz.janboerman.guilib.GuiLibrary
-import xyz.janboerman.guilib.api.GuiListener
 import java.io.File
 import java.time.Duration
 
 class WapCore : JavaPlugin() {
 
-    lateinit var guilistener: GuiListener
-
     companion object {
-        val minimsg: MiniMessage = MiniMessage.miniMessage()
+        private val minimsg: MiniMessage = MiniMessage.miniMessage()
+
+        fun mini(msg: String): Component = minimsg.deserialize(msg)
     }
 
     override fun onEnable() {
-        val guilib = server.pluginManager.getPlugin("GuiLib") as GuiLibrary
-        guilistener = guilib.guiListener
-
         setupConfig()
         setupCommands()
         setupListeners()
+        setupGui()
+    }
+
+    private fun setupGui() {
+
     }
 
     private fun setupListeners() {
