@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import java.io.File
 import java.io.IOException
+import java.lang.Exception
 import java.util.*
 
 object WarpUtils {
@@ -107,7 +108,13 @@ object WarpUtils {
                 throw IOException("找不到地标 $id")
             }
 
-            teleport(plug, plr, YamlConfiguration.loadConfiguration(this))
+            val yml = YamlConfiguration.loadConfiguration(this)
+
+            if (yml.getBoolean("hiddenp") && plr.hasPermission("wappinger.view.${yml.getString("id")}")) {
+                teleport(plug, plr, yml)
+            } else {
+                throw Exception("你没有传送到这个地标的权限")
+            }
         }
     }
 
