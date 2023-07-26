@@ -67,7 +67,7 @@ object GuiUtils {
      * @param page zero-indexed page number
      */
     fun openGuiFor(plug: WapCore, plr: Player, page: Int) {
-        val inv = ChestMenu("&5传送列表 &7[&8${page + 1}&7]", ChestMenuTexture("dumortierite", "warp_list"))
+        val inv = ChestMenu("&5可用传送点列表 &7- &8${page + 1}", ChestMenuTexture("dumortierite", "warp_list"))
 
         val (ymls, state) = drawGui(plr, page)
 
