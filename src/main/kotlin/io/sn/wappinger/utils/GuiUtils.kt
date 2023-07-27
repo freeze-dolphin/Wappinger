@@ -87,6 +87,10 @@ object GuiUtils {
             }
         }
 
+        (ymls.size..44).forEach {
+            inv.addItem(it, UI_BACKGROUND, ChestMenuUtils.getEmptyClickHandler())
+        }
+
         (45..53).forEach {
             when (it) {
                 46 -> {

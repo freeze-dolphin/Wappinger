@@ -64,7 +64,7 @@ object WarpUtils {
             plug.sendtitle(
                 plr,
                 "<green><bold>✔",
-                "<color:#9AFF9A>${plug.getIndicator()}</color></white>"
+                "<color:#9AFF9A>${plug.getIndicator()}</color>"
             )
             plr.playSound(plr.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
             return
@@ -83,14 +83,22 @@ object WarpUtils {
                             PlayerPermUtils.getWarpDelay(
                                 plr, plug.config.getInt("default-delay")
                             )
-                        )
+                        ).let { itp ->
+                            itp.slice(1 until itp.length)
+                        }
                     }</green>"
                 )
                 plr.playSound(plr.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
                 moveDetectMap.remove(plr.uniqueId)
             }) { // each sec
-            val pre = plug.getIndicator().repeat(it.totalSeconds - it.secondsLeft)
-            val suf = plug.getIndicator().repeat(it.secondsLeft)
+            val pre = plug.getIndicator().repeat(it.totalSeconds - it.secondsLeft).let { itp ->
+                itp.slice(1 until itp.length)
+            }
+            val suf = plug.getIndicator().repeat(it.secondsLeft).let { itp ->
+                if (it.secondsLeft == it.totalSeconds) {
+                    itp.slice(1 until itp.length)
+                } else itp
+            }
             plug.sendtitle(
                 plr,
                 "<white>${StringUtils.toSBC(it.secondsLeft.toString())}",
