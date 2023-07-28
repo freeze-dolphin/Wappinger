@@ -1,7 +1,6 @@
 package io.sn.wappinger.setup
 
 import dev.jorel.commandapi.CommandAPICommand
-import dev.jorel.commandapi.CommandPermission
 import dev.jorel.commandapi.arguments.ArgumentSuggestions
 import dev.jorel.commandapi.arguments.BooleanArgument
 import dev.jorel.commandapi.arguments.IntegerArgument
@@ -21,7 +20,7 @@ class CommandBus(private val plug: WapCore) {
         CommandAPICommand("wappinger").withAliases("warp", "wap").withSubcommands(
             CommandAPICommand("create").withArguments(StringArgument("id"))
                 .withOptionalArguments(BooleanArgument("follow"))
-                .withOptionalArguments(BooleanArgument("hidden")).withPermission(CommandPermission.OP)
+                .withOptionalArguments(BooleanArgument("hidden")).withPermission("wappinger.cmd.create")
                 .executesPlayer(PlayerCommandExecutor { sender, args ->
                     val id = args[0] as String
                     val follow = args.getOptional("follow").orElse(false) as Boolean
@@ -37,7 +36,7 @@ class CommandBus(private val plug: WapCore) {
                     WarpUtils.save(plug, hand, sender.location, id, follow, hidden)
                     plug.sendmsg(sender, "<green>新增地标: <white>$id")
                 }),
-            CommandAPICommand("to").withArguments(StringArgument("id").replaceSuggestions(ArgumentSuggestions.stringsAsync { sender ->
+            CommandAPICommand("to").withPermission("wappinger.cmd.to").withArguments(StringArgument("id").replaceSuggestions(ArgumentSuggestions.stringsAsync { sender ->
                 CompletableFuture.supplyAsync {
                     if (sender.sender is Player) {
                         val waps = GuiUtils.fetch(sender.sender as Player) ?: throw Exception("目前还没有可用的地标")
@@ -57,7 +56,7 @@ class CommandBus(private val plug: WapCore) {
                     plug.sendmsg(sender, "<red>" + ex.message)
                 }
             }),
-            CommandAPICommand("gui").withOptionalArguments(IntegerArgument("page").replaceSuggestions(ArgumentSuggestions.stringsAsync { sender ->
+            CommandAPICommand("gui").withPermission("wappinger.cmd.gui").withOptionalArguments(IntegerArgument("page").replaceSuggestions(ArgumentSuggestions.stringsAsync { sender ->
                 CompletableFuture.supplyAsync {
                     if (sender.sender is Player) {
                         val waps = GuiUtils.fetch(sender.sender as Player) ?: throw Exception("目前还没有可用的地标")
