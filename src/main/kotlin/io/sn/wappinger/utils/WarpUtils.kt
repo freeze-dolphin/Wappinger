@@ -54,6 +54,61 @@ object WarpUtils {
         return dest
     }
 
+    fun teleport(plug: WapCore, plr: Player, dest: Location) {
+        val delay = PlayerPermUtils.getWarpDelay(plr, plug.config.getInt("default-delay"))
+
+        if (delay == 0) {
+            plr.fallDistance = 0F
+            plr.teleport(dest)
+            plug.sendtitle(
+                plr,
+                "<green><bold>✔",
+                "<color:#9AFF9A>${plug.getIndicator()}</color>"
+            )
+            plr.playSound(plr.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
+            return
+        }
+
+        val timer = CountdownTimer(plug, delay,
+            { // before
+            }, { // end
+                plr.fallDistance = 0F
+                plr.teleport(dest)
+                plug.sendtitle(
+                    plr,
+                    "<green><bold>✔",
+                    "<green>${
+                        plug.getIndicator().repeat(
+                            PlayerPermUtils.getWarpDelay(
+                                plr, plug.config.getInt("default-delay")
+                            )
+                        ).let { itp ->
+                            itp.slice(1 until itp.length)
+                        }
+                    }</green>"
+                )
+                plr.playSound(plr.location, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F)
+                moveDetectMap.remove(plr.uniqueId)
+            }) { // each sec
+            val pre = plug.getIndicator().repeat(it.totalSeconds - it.secondsLeft).let { itp ->
+                itp.slice(1 until itp.length)
+            }
+            val suf = plug.getIndicator().repeat(it.secondsLeft).let { itp ->
+                if (it.secondsLeft == it.totalSeconds) {
+                    itp.slice(1 until itp.length)
+                } else itp
+            }
+            plug.sendtitle(
+                plr,
+                "<white>${StringUtils.toSBC(it.secondsLeft.toString())}",
+                "<green>$pre</green><gray>$suf</gray>"
+            )
+            plr.playSound(plr.location, Sound.ENTITY_ITEM_PICKUP, 1F, 1F)
+        }
+        moveDetectMap[plr.uniqueId] = timer
+        moveDetectMap[plr.uniqueId]?.scheduleTimer()
+    }
+
     fun teleport(plug: WapCore, plr: Player, yml: YamlConfiguration) {
         val dest = getDestination(yml, plr)
         val delay = PlayerPermUtils.getWarpDelay(plr, plug.config.getInt("default-delay"))
@@ -117,7 +172,7 @@ object WarpUtils {
             }
 
             val yml = YamlConfiguration.loadConfiguration(this)
-            
+
             if ((ignorePerm || plr.isOp) || (yml.getBoolean("hiddenp") && (plr.hasPermission("wappinger.view.${yml.getString("id")}")))) {
                 teleport(plug, plr, yml)
             } else {

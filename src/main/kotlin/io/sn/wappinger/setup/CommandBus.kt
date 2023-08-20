@@ -38,6 +38,17 @@ class CommandBus(private val plug: WapCore) {
                     WarpUtils.save(plug, hand, sender.location, id, follow, hidden)
                     plug.sendmsg(sender, "<green>新增地标: <white>$id")
                 }),
+            CommandAPICommand("back").withPermission("wappinger.cmd.back")
+                .withArguments(PlayerArgument("player"))
+                .executes(CommandExecutor { sender, args ->
+                    val plr = args[0] as Player
+
+                    try {
+                        plr.lastDeathLocation?.let { WarpUtils.teleport(plug, plr, it) }
+                    } catch (ex: Exception) {
+                        plug.sendmsg(sender, "<red>" + ex.message)
+                    }
+                }),
             CommandAPICommand("to").withPermission("wappinger.cmd.to")
                 .withArguments(StringArgument("id").replaceSuggestions(ArgumentSuggestions.stringsAsync { sender ->
                     CompletableFuture.supplyAsync {
