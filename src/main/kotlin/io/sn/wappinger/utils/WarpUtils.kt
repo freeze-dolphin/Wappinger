@@ -110,15 +110,15 @@ object WarpUtils {
         moveDetectMap[plr.uniqueId]?.scheduleTimer()
     }
 
-    fun teleport(plug: WapCore, plr: Player, id: String) {
+    fun teleport(plug: WapCore, plr: Player, id: String, ignorePerm: Boolean) {
         with(File(plug.dataFolder.path + File.separator + "storage" + File.separator + id + ".yml")) {
             if (!exists()) {
                 throw IOException("找不到地标 $id")
             }
 
             val yml = YamlConfiguration.loadConfiguration(this)
-
-            if (yml.getBoolean("hiddenp") && plr.hasPermission("wappinger.view.${yml.getString("id")}")) {
+            
+            if ((ignorePerm || plr.isOp) || (yml.getBoolean("hiddenp") && (plr.hasPermission("wappinger.view.${yml.getString("id")}")))) {
                 teleport(plug, plr, yml)
             } else {
                 throw Exception("你没有传送到这个地标的权限")
